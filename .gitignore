@@ -56,3 +56,7 @@ target/
 
 .eric4project
 *.e4p
+
+# vim
+*.swp
+*.*~
