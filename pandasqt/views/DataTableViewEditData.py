@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Only edit dataframe values.  No new rows or columns.
+"""
 from pandasqt.compat import QtCore, QtGui, Qt, Slot, Signal
 
 from DataTableView import DataTableWidget
@@ -25,58 +28,17 @@ class DataTableWidgetEditData(DataTableWidget):
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.buttonFrame = QtGui.QFrame(self)
-        #self.buttonFrame.setMinimumSize(QtCore.QSize(250, 50))
-        #self.buttonFrame.setMaximumSize(QtCore.QSize(250, 50))
-        self.buttonFrame.setFrameShape(QtGui.QFrame.NoFrame)
-        spacerItemButton = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-
-        self.buttonFrameLayout = QtGui.QGridLayout(self.buttonFrame)
-        self.buttonFrameLayout.setContentsMargins(0, 0, 0, 0)
-
-        self.addRowButton = QtGui.QToolButton(self.buttonFrame)
-        self.addRowButton.setObjectName('addrowbutton')
-        self.addRowButton.setText(self.tr(u'+row'))
-        self.addRowButton.setToolTip(self.tr(u'add new row'))
-        icon = QtGui.QIcon(QtGui.QPixmap(_fromUtf8(':/icons/edit-table-insert-row-below.png')))
-
-        self.addRowButton.setIcon(icon)
-
-        self.removeRowButton = QtGui.QToolButton(self.buttonFrame)
-        self.removeRowButton.setObjectName('removerowbutton')
-        self.removeRowButton.setText(self.tr(u'-row'))
-        self.removeRowButton.setToolTip(self.tr(u'remove selected rows'))
-        icon = QtGui.QIcon(QtGui.QPixmap(_fromUtf8(':/icons/edit-table-delete-row.png')))
-
-        self.removeRowButton.setIcon(icon)
-
-        self.buttons = [self.addRowButton, self.removeRowButton]
-
-        for index, button in enumerate(self.buttons):
-            button.setMinimumSize(self._iconSize)
-            button.setMaximumSize(self._iconSize)
-            button.setIconSize(self._iconSize)
-            button.setCheckable(True)
-            self.buttonFrameLayout.addWidget(button, 0, index, 1, 1)
-        self.buttonFrameLayout.addItem(spacerItemButton, 0, index+1, 1, 1)
-
-        for button in self.buttons:
-            button.setEnabled(False)
-
         #self.tableView = QtGui.QTableView(self)
         self.tableView = DragTable(self)
         self.tableView.setAlternatingRowColors(True)
         self.tableView.setSortingEnabled(True)
-        
-        self.gridLayout.addWidget(self.buttonFrame, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.tableView, 1, 0, 1, 1)
-
-        self.addRowButton.toggled.connect(self.addRow)
-        self.removeRowButton.toggled.connect(self.removeRow)
+        self.buttons = []
 
     @Slot(bool)
     def enableEditing(self, enabled):
-        """Enable the editing buttons to add/remove rows/columns and to edit the data.
+        """Enable the editing buttons to add/remove rows/columns and to edit
+        the data.
 
         This method is also a slot.
         In addition, the data of model will be made editable,
@@ -87,11 +49,6 @@ class DataTableWidgetEditData(DataTableWidget):
                 shall be activated.
 
         """
-        for button in self.buttons:
-            button.setEnabled(enabled)
-            if button.isChecked():
-                button.setChecked(False)
-
         model = self.tableView.model()
 
         if model is not None:
