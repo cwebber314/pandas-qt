@@ -39,6 +39,7 @@ class ColumnDtypeModel(QtCore.QAbstractTableModel):
         self.headers = ['column', 'data type']
 
         self._editable = editable
+        self._ro_cols = [] 
 
         self._dataFrame = pandas.DataFrame()
         if dataFrame is not None:

@@ -5,6 +5,7 @@
 """
 
 from datetime import datetime
+import pdb
 
 from pandasqt.compat import Qt, QtCore, QtGui, Slot, Signal
 
@@ -79,6 +80,8 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         super(DataFrameModel, self).__init__()
 
         self._dataFrame = pandas.DataFrame()
+        self._ro_cols = []
+
         if dataFrame is not None:
             self.setDataFrame(dataFrame, copyDataFrame=copyDataFrame)
         self.dataChanged.emit()
@@ -272,6 +275,22 @@ class DataFrameModel(QtCore.QAbstractTableModel):
             result = None
         return result
 
+    def setReadOnlyCols(self, cols):
+        """
+        Set some columns to be readonly.
+        
+        :param cols: list of integer column numbers
+        """
+        if not isinstance(cols, list):
+            raise TypeError('Argument must be a list of integers')
+        for col in cols:
+            if not isinstance(col, int):
+                raise TypeError('Argument must be a list of integers')
+        for col in []:
+            if col > len(self._dataFrame.columns):
+                raise ValueError("Invalid column number %s" % col)
+        self._ro_cols = cols
+
     def flags(self, index):
         """Returns the item flags for the given index as ored value, e.x.: Qt.ItemIsUserCheckable | Qt.ItemIsEditable
 
@@ -283,6 +302,8 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         Returns:
             if column dtype is not boolean Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
             if column dtype is boolean Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
+
+        Use index.row() and index.column()
         """
         flags = super(DataFrameModel, self).flags(index)
 
@@ -295,6 +316,10 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         else:
             # if you want to have a combobox for bool columns set this
             flags |= Qt.ItemIsEditable
+        
+        if index.column() in self._ro_cols:
+            pdb.set_trace()
+            flags &= ~Qt.ItemIsEditable
 
         return flags
 
